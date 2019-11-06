@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '../store';
 import { PostState } from '../store/post/types';
-import { createPost } from '../store/post/actions';
+import { addPost, fetchPosts } from '../store/post/actions';
 
 interface AppProps {
   post: PostState;
-  createPost: typeof createPost;
+  addPost: any;
+  fetchPosts: any;
 }
 
-const App: React.FC<AppProps> = ({ post, createPost }) => {
+const App: React.FC<AppProps> = ({ post, addPost, fetchPosts }) => {
   const [title, setTitle] = useState('');
 
-  const submit = () => {
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  const submit = async () => {
     if (title) {
-      createPost({
-        title,
-        timestamp: new Date().getTime()
-      });
       setTitle('');
+      addPost(title);
     }
   };
 
@@ -40,7 +42,7 @@ const App: React.FC<AppProps> = ({ post, createPost }) => {
       />
       <button onClick={submit}>Post</button>
       {post.posts.map(post => (
-        <div key={post.timestamp}>
+        <div key={post.id}>
           <h3>{post.title}</h3>
           <p>{new Date(post.timestamp).toLocaleString()}</p>
         </div>
@@ -55,5 +57,5 @@ const mapStateToProps = (state: AppState) => ({
 
 export default connect(
   mapStateToProps,
-  { createPost }
+  { addPost, fetchPosts }
 )(App);
